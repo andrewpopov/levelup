@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Environment variables
 .env
@@ -38,7 +37,11 @@ Thumbs.db
 
 # Cloudflared
 .cloudflared/
-*.json
+.cloudflared/*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!jsconfig.json
 
 # Temporary files
 *.tmp
