@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Heart, BookOpen, Image, Sparkles, Target, LogOut } from 'lucide-react';
+import { Heart, BookOpen, Image, Sparkles, Target, MessageCircle, LogOut } from 'lucide-react';
 
 function Header({ user, onLogout }) {
   const location = useLocation();
@@ -34,6 +34,10 @@ function Header({ user, onLogout }) {
           <Link to="/goals" className={`nav-link ${isActive('/goals') ? 'active' : ''}`}>
             <Target size={18} />
             Goals
+          </Link>
+          <Link to="/questions" className={`nav-link ${isActive('/questions') ? 'active' : ''}`}>
+            <MessageCircle size={18} />
+            Questions
           </Link>
           <button onClick={onLogout} className="icon-button">
             <LogOut size={18} />

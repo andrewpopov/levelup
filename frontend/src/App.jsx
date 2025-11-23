@@ -7,6 +7,7 @@ import Journal from './components/Journal';
 import Memories from './components/Memories';
 import Gratitude from './components/Gratitude';
 import Goals from './components/Goals';
+import Questions from './components/Questions';
 import Header from './components/Header';
 
 function App() {
@@ -113,6 +114,16 @@ function App() {
           element={
             isAuthenticated ? (
               <Goals />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/questions"
+          element={
+            isAuthenticated ? (
+              <Questions />
             ) : (
               <Navigate to="/login" replace />
             )

@@ -71,4 +71,26 @@ export const updateGoal = (id, goal) =>
 export const deleteGoal = (id) =>
   api.delete(`/goals/${id}`);
 
+// Questions
+export const getQuestionCategories = () =>
+  api.get('/questions/categories');
+
+export const getQuestions = () =>
+  api.get('/questions');
+
+export const getQuestionsByCategory = (categoryId) =>
+  api.get(`/questions/category/${categoryId}`);
+
+export const getQuestionByWeek = (weekNumber) =>
+  api.get(`/questions/week/${weekNumber}`);
+
+export const getQuestion = (id) =>
+  api.get(`/questions/${id}`);
+
+export const saveQuestionResponse = (id, response_text) =>
+  api.post(`/questions/${id}/response`, { response_text });
+
+export const deleteQuestionResponse = (questionId) =>
+  api.delete(`/questions/${questionId}/response`);
+
 export default api;
