@@ -75,6 +75,55 @@ export function initializeDatabase() {
           completed_at DATETIME,
           FOREIGN KEY (created_by) REFERENCES users (id)
         )
+      `);
+
+      // Question categories table
+      db.run(`
+        CREATE TABLE IF NOT EXISTS question_categories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          description TEXT,
+          display_order INTEGER NOT NULL
+        )
+      `);
+
+      // Questions table (main prompts)
+      db.run(`
+        CREATE TABLE IF NOT EXISTS questions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          category_id INTEGER NOT NULL,
+          week_number INTEGER NOT NULL,
+          title TEXT NOT NULL,
+          main_prompt TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (category_id) REFERENCES question_categories (id)
+        )
+      `);
+
+      // Question details table (guiding sub-questions)
+      db.run(`
+        CREATE TABLE IF NOT EXISTS question_details (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          question_id INTEGER NOT NULL,
+          detail_text TEXT NOT NULL,
+          display_order INTEGER NOT NULL,
+          FOREIGN KEY (question_id) REFERENCES questions (id)
+        )
+      `);
+
+      // Question responses table
+      db.run(`
+        CREATE TABLE IF NOT EXISTS question_responses (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          question_id INTEGER NOT NULL,
+          user_id INTEGER NOT NULL,
+          response_text TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (question_id) REFERENCES questions (id),
+          FOREIGN KEY (user_id) REFERENCES users (id),
+          UNIQUE(question_id, user_id)
+        )
       `, (err) => {
         if (err) {
           reject(err);

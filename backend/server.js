@@ -379,6 +379,253 @@ app.delete('/api/goals/:id', authenticateToken, (req, res) => {
   );
 });
 
+// ============= QUESTION BANK ROUTES =============
+
+// Get all categories
+app.get('/api/questions/categories', authenticateToken, (req, res) => {
+  db.all(
+    'SELECT * FROM question_categories ORDER BY display_order',
+    (err, categories) => {
+      if (err) {
+        return res.status(500).json({ error: 'Error fetching categories' });
+      }
+      res.json(categories);
+    }
+  );
+});
+
+// Get all questions with their categories and details
+app.get('/api/questions', authenticateToken, (req, res) => {
+  const query = `
+    SELECT
+      q.id, q.week_number, q.title, q.main_prompt, q.created_at,
+      c.id as category_id, c.name as category_name, c.description as category_description
+    FROM questions q
+    JOIN question_categories c ON q.category_id = c.id
+    ORDER BY q.week_number
+  `;
+
+  db.all(query, (err, questions) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error fetching questions' });
+    }
+
+    // Get details for each question
+    const questionsWithDetails = [];
+    let processed = 0;
+
+    if (questions.length === 0) {
+      return res.json([]);
+    }
+
+    questions.forEach((question) => {
+      db.all(
+        'SELECT id, detail_text, display_order FROM question_details WHERE question_id = ? ORDER BY display_order',
+        [question.id],
+        (err, details) => {
+          if (err) {
+            return res.status(500).json({ error: 'Error fetching question details' });
+          }
+
+          questionsWithDetails.push({
+            ...question,
+            details: details
+          });
+
+          processed++;
+          if (processed === questions.length) {
+            res.json(questionsWithDetails);
+          }
+        }
+      );
+    });
+  });
+});
+
+// Get questions by category
+app.get('/api/questions/category/:categoryId', authenticateToken, (req, res) => {
+  const { categoryId } = req.params;
+
+  const query = `
+    SELECT
+      q.id, q.week_number, q.title, q.main_prompt, q.created_at,
+      c.id as category_id, c.name as category_name
+    FROM questions q
+    JOIN question_categories c ON q.category_id = c.id
+    WHERE c.id = ?
+    ORDER BY q.week_number
+  `;
+
+  db.all(query, [categoryId], (err, questions) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error fetching questions' });
+    }
+    res.json(questions);
+  });
+});
+
+// Get a specific question by week number with details
+app.get('/api/questions/week/:weekNumber', authenticateToken, (req, res) => {
+  const { weekNumber } = req.params;
+
+  const query = `
+    SELECT
+      q.id, q.week_number, q.title, q.main_prompt, q.created_at,
+      c.id as category_id, c.name as category_name, c.description as category_description
+    FROM questions q
+    JOIN question_categories c ON q.category_id = c.id
+    WHERE q.week_number = ?
+  `;
+
+  db.get(query, [weekNumber], (err, question) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error fetching question' });
+    }
+    if (!question) {
+      return res.status(404).json({ error: 'Question not found' });
+    }
+
+    // Get question details
+    db.all(
+      'SELECT id, detail_text, display_order FROM question_details WHERE question_id = ? ORDER BY display_order',
+      [question.id],
+      (err, details) => {
+        if (err) {
+          return res.status(500).json({ error: 'Error fetching question details' });
+        }
+
+        res.json({
+          ...question,
+          details: details
+        });
+      }
+    );
+  });
+});
+
+// Get a specific question by ID with details and responses
+app.get('/api/questions/:id', authenticateToken, (req, res) => {
+  const { id } = req.params;
+
+  const query = `
+    SELECT
+      q.id, q.week_number, q.title, q.main_prompt, q.created_at,
+      c.id as category_id, c.name as category_name, c.description as category_description
+    FROM questions q
+    JOIN question_categories c ON q.category_id = c.id
+    WHERE q.id = ?
+  `;
+
+  db.get(query, [id], (err, question) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error fetching question' });
+    }
+    if (!question) {
+      return res.status(404).json({ error: 'Question not found' });
+    }
+
+    // Get question details
+    db.all(
+      'SELECT id, detail_text, display_order FROM question_details WHERE question_id = ? ORDER BY display_order',
+      [question.id],
+      (err, details) => {
+        if (err) {
+          return res.status(500).json({ error: 'Error fetching question details' });
+        }
+
+        // Get responses
+        db.all(
+          `SELECT qr.id, qr.response_text, qr.created_at, qr.updated_at,
+                  u.id as user_id, u.username, u.display_name
+           FROM question_responses qr
+           JOIN users u ON qr.user_id = u.id
+           WHERE qr.question_id = ?`,
+          [question.id],
+          (err, responses) => {
+            if (err) {
+              return res.status(500).json({ error: 'Error fetching responses' });
+            }
+
+            res.json({
+              ...question,
+              details: details,
+              responses: responses
+            });
+          }
+        );
+      }
+    );
+  });
+});
+
+// Save or update a response to a question
+app.post('/api/questions/:id/response', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  const { response_text } = req.body;
+  const userId = req.user.userId;
+
+  if (!response_text) {
+    return res.status(400).json({ error: 'Response text is required' });
+  }
+
+  // Check if response already exists
+  db.get(
+    'SELECT id FROM question_responses WHERE question_id = ? AND user_id = ?',
+    [id, userId],
+    (err, existing) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      if (existing) {
+        // Update existing response
+        db.run(
+          'UPDATE question_responses SET response_text = ?, updated_at = CURRENT_TIMESTAMP WHERE question_id = ? AND user_id = ?',
+          [response_text, id, userId],
+          function(err) {
+            if (err) {
+              return res.status(500).json({ error: 'Error updating response' });
+            }
+            res.json({ id: existing.id, message: 'Response updated successfully' });
+          }
+        );
+      } else {
+        // Create new response
+        db.run(
+          'INSERT INTO question_responses (question_id, user_id, response_text) VALUES (?, ?, ?)',
+          [id, userId, response_text],
+          function(err) {
+            if (err) {
+              return res.status(500).json({ error: 'Error creating response' });
+            }
+            res.json({ id: this.lastID, message: 'Response saved successfully' });
+          }
+        );
+      }
+    }
+  );
+});
+
+// Delete a response
+app.delete('/api/questions/:questionId/response', authenticateToken, (req, res) => {
+  const { questionId } = req.params;
+  const userId = req.user.userId;
+
+  db.run(
+    'DELETE FROM question_responses WHERE question_id = ? AND user_id = ?',
+    [questionId, userId],
+    function(err) {
+      if (err) {
+        return res.status(500).json({ error: 'Error deleting response' });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Response not found' });
+      }
+      res.json({ message: 'Response deleted successfully' });
+    }
+  );
+});
+
 // ============= HEALTH CHECK =============
 
 app.get('/api/health', (req, res) => {
