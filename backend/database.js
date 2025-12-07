@@ -235,13 +235,197 @@ export function initializeDatabase() {
         )
       `);
 
+      // ============= RICHER RESPONSES SYSTEM =============
+
+      // Enhanced question responses with media support
+      db.run(`
+        CREATE TABLE IF NOT EXISTS enhanced_question_responses (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          response_id INTEGER NOT NULL,
+          response_type TEXT DEFAULT 'text',
+          media_url TEXT,
+          transcription TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (response_id) REFERENCES question_responses (id) ON DELETE CASCADE
+        )
+      `);
+
+      // Follow-up questions on responses
+      db.run(`
+        CREATE TABLE IF NOT EXISTS response_followups (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          response_id INTEGER NOT NULL,
+          followup_text TEXT NOT NULL,
+          asked_by INTEGER NOT NULL,
+          followup_response TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (response_id) REFERENCES question_responses (id) ON DELETE CASCADE,
+          FOREIGN KEY (asked_by) REFERENCES users (id)
+        )
+      `);
+
+      // ============= MULTI-USER JOURNEY SYSTEM =============
+
+      // Team journeys for collaborative learning
+      db.run(`
+        CREATE TABLE IF NOT EXISTS team_journeys (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          team_id INTEGER NOT NULL,
+          journey_id INTEGER NOT NULL,
+          created_by INTEGER NOT NULL,
+          status TEXT DEFAULT 'active',
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (journey_id) REFERENCES journeys (id),
+          FOREIGN KEY (created_by) REFERENCES users (id),
+          UNIQUE(team_id, journey_id)
+        )
+      `);
+
+      // Team members
+      db.run(`
+        CREATE TABLE IF NOT EXISTS team_members (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          team_id INTEGER NOT NULL,
+          user_id INTEGER NOT NULL,
+          role TEXT DEFAULT 'member',
+          joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users (id),
+          UNIQUE(team_id, user_id)
+        )
+      `);
+
+      // Shared task submissions
+      db.run(`
+        CREATE TABLE IF NOT EXISTS shared_task_submissions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          team_journey_id INTEGER NOT NULL,
+          task_id INTEGER NOT NULL,
+          submitted_by INTEGER NOT NULL,
+          submission_content TEXT NOT NULL,
+          status TEXT DEFAULT 'submitted',
+          submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (team_journey_id) REFERENCES team_journeys (id) ON DELETE CASCADE,
+          FOREIGN KEY (task_id) REFERENCES journey_tasks (id),
+          FOREIGN KEY (submitted_by) REFERENCES users (id),
+          UNIQUE(team_journey_id, task_id, submitted_by)
+        )
+      `);
+
+      // Peer reviews of submissions
+      db.run(`
+        CREATE TABLE IF NOT EXISTS submission_reviews (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          submission_id INTEGER NOT NULL,
+          reviewed_by INTEGER NOT NULL,
+          feedback TEXT,
+          rating INTEGER,
+          reviewed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (submission_id) REFERENCES shared_task_submissions (id) ON DELETE CASCADE,
+          FOREIGN KEY (reviewed_by) REFERENCES users (id),
+          UNIQUE(submission_id, reviewed_by)
+        )
+      `);
+
+      // ============= CERTIFICATION & BADGES =============
+
+      // User competency profiles
+      db.run(`
+        CREATE TABLE IF NOT EXISTS competency_profiles (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          journey_id INTEGER NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users (id),
+          FOREIGN KEY (journey_id) REFERENCES journeys (id),
+          UNIQUE(user_id, journey_id)
+        )
+      `);
+
+      // Competency assessments
+      db.run(`
+        CREATE TABLE IF NOT EXISTS competency_assessments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          profile_id INTEGER NOT NULL,
+          signal_name TEXT NOT NULL,
+          target_level INTEGER,
+          current_level INTEGER DEFAULT 0,
+          assessed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (profile_id) REFERENCES competency_profiles (id) ON DELETE CASCADE
+        )
+      `);
+
+      // Certifications
+      db.run(`
+        CREATE TABLE IF NOT EXISTS certifications (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          journey_id INTEGER NOT NULL,
+          issued_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          certificate_url TEXT,
+          is_sharable BOOLEAN DEFAULT 1,
+          shareable_token TEXT UNIQUE,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users (id),
+          FOREIGN KEY (journey_id) REFERENCES journeys (id),
+          UNIQUE(user_id, journey_id)
+        )
+      `);
+
+      // Badges earned
+      db.run(`
+        CREATE TABLE IF NOT EXISTS badges (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          badge_name TEXT NOT NULL,
+          icon_url TEXT,
+          description TEXT,
+          requirements TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      // User badges
+      db.run(`
+        CREATE TABLE IF NOT EXISTS user_badges (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          badge_id INTEGER NOT NULL,
+          earned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users (id),
+          FOREIGN KEY (badge_id) REFERENCES badges (id),
+          UNIQUE(user_id, badge_id)
+        )
+      `);
+
+      // ============= DOMAIN EVENTS AUDIT TRAIL =============
+
+      db.run(`
+        CREATE TABLE IF NOT EXISTS domain_events (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          event_type TEXT NOT NULL,
+          event_data TEXT,
+          aggregate_id INTEGER,
+          aggregate_type TEXT,
+          published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          processed BOOLEAN DEFAULT 0
+        )
+      `);
+
       // Create indexes for performance
       db.run(`CREATE INDEX IF NOT EXISTS idx_user_journeys_user_status
               ON user_journeys(user_id, status)`);
       db.run(`CREATE INDEX IF NOT EXISTS idx_task_progress_due_date
               ON user_task_progress(due_date, status)`);
       db.run(`CREATE INDEX IF NOT EXISTS idx_journey_tasks_journey
-              ON journey_tasks(journey_id, task_order)`, (err) => {
+              ON journey_tasks(journey_id, task_order)`);
+      db.run(`CREATE INDEX IF NOT EXISTS idx_team_journeys_team
+              ON team_journeys(team_id, status)`);
+      db.run(`CREATE INDEX IF NOT EXISTS idx_submissions_team_journey
+              ON shared_task_submissions(team_journey_id, status)`);
+      db.run(`CREATE INDEX IF NOT EXISTS idx_certifications_user
+              ON certifications(user_id)`);
+      db.run(`CREATE INDEX IF NOT EXISTS idx_domain_events_type
+              ON domain_events(event_type, published_at)`, (err) => {
         if (err) {
           reject(err);
         } else {
