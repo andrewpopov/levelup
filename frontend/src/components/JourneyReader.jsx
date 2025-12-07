@@ -28,8 +28,10 @@ function JourneyReader({ user }) {
   const [questionData, setQuestionData] = useState(null);
   const [questionStatus, setQuestionStatus] = useState(null);
   const [myResponse, setMyResponse] = useState('');
+  const [savedResponse, setSavedResponse] = useState(''); // Track what's been saved
   const [jointNotes, setJointNotes] = useState('');
   const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
 
   useEffect(() => {
     loadJourney();
@@ -40,6 +42,19 @@ function JourneyReader({ user }) {
       loadCurrentTask();
     }
   }, [currentTaskIndex, tasks]);
+
+  // Auto-save with debounce
+  useEffect(() => {
+    if (!myResponse.trim() || myResponse === savedResponse || !currentTask?.question_id) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      handleAutoSave();
+    }, 2000); // Auto-save after 2 seconds of no typing
+
+    return () => clearTimeout(timer);
+  }, [myResponse]);
 
   const loadJourney = async () => {
     try {
@@ -91,17 +106,17 @@ function JourneyReader({ user }) {
         setQuestionData(questionRes.data);
         setQuestionStatus(statusRes.data);
 
-        // Load existing response
-        const myExisting = statusRes.data?.responses?.find(r => r.user_id === user.id);
+        // Load existing response from question responses
+        const myExisting = questionRes.data?.responses?.find(r => r.user_id === user.id);
         if (myExisting) {
           setMyResponse(myExisting.response_text);
         } else {
           setMyResponse('');
         }
 
-        // Load existing discussion
-        if (statusRes.data?.discussion) {
-          setJointNotes(statusRes.data.discussion.joint_notes || '');
+        // Load existing discussion notes from status
+        if (statusRes.data?.jointNotes) {
+          setJointNotes(statusRes.data.jointNotes);
         } else {
           setJointNotes('');
         }
@@ -127,22 +142,28 @@ function JourneyReader({ user }) {
 
   const jumpToTask = (index) => {
     setCurrentTaskIndex(index);
-    setShowTOC(false);
+    // Keep TOC open so user can continue navigating
   };
 
-  const handleSaveResponse = async () => {
-    if (!myResponse.trim() || !currentTask.question_id) return;
+  const handleAutoSave = async () => {
+    if (!myResponse.trim() || !currentTask?.question_id) return;
 
     setSaving(true);
     try {
       await saveQuestionResponse(currentTask.question_id, myResponse);
-      await loadCurrentTask(); // Reload to get updated status
+      setSavedResponse(myResponse); // Mark this as saved
+      setLastSaved(new Date());
+      // Don't reload - let UI stay responsive
     } catch (error) {
       console.error('Error saving response:', error);
-      alert('Error saving response');
+      // Silently fail for auto-save
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSaveResponse = async () => {
+    await handleAutoSave();
   };
 
   const handleMarkDiscussed = async () => {
@@ -194,10 +215,10 @@ function JourneyReader({ user }) {
     );
   }
 
-  const partnerResponse = questionStatus?.responses?.find(r => r.user_id !== user.id);
-  const myExistingResponse = questionStatus?.responses?.find(r => r.user_id === user.id);
-  const bothAnswered = questionStatus?.responses?.length === 2;
-  const isDiscussed = questionStatus?.discussion?.discussed_at;
+  const partnerResponse = questionData?.responses?.find(r => r.user_id !== user.id);
+  const myExistingResponse = questionData?.responses?.find(r => r.user_id === user.id);
+  const bothAnswered = questionStatus?.bothAnswered;
+  const isDiscussed = questionStatus?.isDiscussed;
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh' }}>
@@ -404,16 +425,27 @@ function JourneyReader({ user }) {
                             marginBottom: '1rem'
                           }}
                         />
-                        <button
-                          className="btn-primary"
-                          onClick={handleSaveResponse}
-                          disabled={saving || !myResponse.trim()}
-                        >
-                          {saving ? 'Saving...' : myExistingResponse ? 'Update Response' : 'Save Response'}
-                        </button>
-                        {myExistingResponse && (
-                          <p style={{ marginTop: '1rem', color: '#388e3c', fontSize: '0.9rem' }}>
-                            ✓ Your response is saved. Waiting for your partner...
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                          <button
+                            className="btn-primary"
+                            onClick={handleSaveResponse}
+                            disabled={!myResponse.trim() || myResponse === savedResponse}
+                          >
+                            {saving ? 'Auto-saving...' : 'Save Response'}
+                          </button>
+                          {myResponse !== savedResponse ? (
+                            <span style={{ color: '#ff9800', fontSize: '0.9rem', fontWeight: '500' }}>
+                              ⚫ Unsaved changes
+                            </span>
+                          ) : myExistingResponse ? (
+                            <span style={{ color: '#388e3c', fontSize: '0.9rem', fontWeight: '500' }}>
+                              ✓ {lastSaved ? `Saved ${new Date(lastSaved).toLocaleTimeString()}` : 'Saved'}
+                            </span>
+                          ) : null}
+                        </div>
+                        {myExistingResponse && myResponse === savedResponse && (
+                          <p style={{ marginTop: '0.5rem', color: '#666', fontSize: '0.9rem' }}>
+                            Your response is saved. Waiting for your partner...
                           </p>
                         )}
                       </>

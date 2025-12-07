@@ -13,14 +13,29 @@ function DailyQuestion({ user }) {
   const [question, setQuestion] = useState(null);
   const [status, setStatus] = useState(null);
   const [myResponse, setMyResponse] = useState('');
+  const [savedResponse, setSavedResponse] = useState(''); // Track what's been saved
   const [jointNotes, setJointNotes] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
   const [currentStep, setCurrentStep] = useState('respond'); // 'respond', 'review', 'discuss'
 
   useEffect(() => {
     loadQuestion();
   }, []);
+
+  // Auto-save with debounce
+  useEffect(() => {
+    if (!question || !myResponse.trim() || myResponse === savedResponse) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      handleAutoSave();
+    }, 2000); // Auto-save after 2 seconds of no typing
+
+    return () => clearTimeout(timer);
+  }, [myResponse]);
 
   const loadQuestion = async () => {
     try {
@@ -32,21 +47,21 @@ function DailyQuestion({ user }) {
       setQuestion(questionRes.data);
       setStatus(statusRes.data);
 
-      // Set my existing response if any
-      const myExistingResponse = statusRes.data.responses.find(r => r.user_id === user.id);
+      // Set my existing response if any (from question data, not status)
+      const myExistingResponse = questionRes.data.responses?.find(r => r.user_id === user.id);
       if (myExistingResponse) {
         setMyResponse(myExistingResponse.response_text);
       }
 
       // Set joint notes if already discussed
-      if (statusRes.data.discussion) {
-        setJointNotes(statusRes.data.discussion.joint_notes || '');
+      if (statusRes.data.jointNotes) {
+        setJointNotes(statusRes.data.jointNotes);
       }
 
       // Determine current step
-      if (statusRes.data.discussion?.discussed_at) {
+      if (statusRes.data.isDiscussed) {
         setCurrentStep('completed');
-      } else if (statusRes.data.responses.length === 2) {
+      } else if (statusRes.data.answeredCount === 2) {
         setCurrentStep('discuss');
       } else if (myExistingResponse) {
         setCurrentStep('review');
@@ -61,19 +76,25 @@ function DailyQuestion({ user }) {
     }
   };
 
-  const handleSaveResponse = async () => {
-    if (!myResponse.trim()) return;
+  const handleAutoSave = async () => {
+    if (!myResponse.trim() || !question) return;
 
     setSaving(true);
     try {
       await saveQuestionResponse(question.id, myResponse);
-      await loadQuestion(); // Reload to update status
+      setSavedResponse(myResponse); // Mark this as saved
+      setLastSaved(new Date());
+      // Don't reload - let UI stay responsive
     } catch (error) {
       console.error('Error saving response:', error);
-      alert('Error saving your response. Please try again.');
+      // Silently fail for auto-save
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSaveResponse = async () => {
+    await handleAutoSave();
   };
 
   const handleMarkDiscussed = async () => {
@@ -112,10 +133,10 @@ function DailyQuestion({ user }) {
     );
   }
 
-  const partnerResponse = status?.responses.find(r => r.user_id !== user.id);
-  const myExistingResponse = status?.responses.find(r => r.user_id === user.id);
-  const bothAnswered = status?.responses.length === 2;
-  const isDiscussed = status?.discussion?.discussed_at;
+  const partnerResponse = question?.responses?.find(r => r.user_id !== user.id);
+  const myExistingResponse = question?.responses?.find(r => r.user_id === user.id);
+  const bothAnswered = status?.bothAnswered;
+  const isDiscussed = status?.isDiscussed;
 
   return (
     <div className="container">

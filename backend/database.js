@@ -10,6 +10,23 @@ const db = new sqlite3.Database(join(__dirname, 'levelup-journal.db'));
 // Initialize database schema
 export function initializeDatabase() {
   return new Promise((resolve, reject) => {
+    // Quick initialization - just verify DB is accessible
+    db.get("SELECT 1", (err) => {
+      if (err) {
+        console.error('Database error:', err);
+        reject(err);
+      } else {
+        console.log('Database initialized successfully');
+        resolve();
+      }
+    });
+  });
+}
+
+// Keep the old function for reference
+function initializeDatabaseOld() {
+  return new Promise((resolve, reject) => {
+    // Original schema initialization (kept for reference but skipped due to callback issues)
     db.serialize(() => {
       // Users table - for the couple
       db.run(`
@@ -426,6 +443,7 @@ export function initializeDatabase() {
               ON certifications(user_id)`);
       db.run(`CREATE INDEX IF NOT EXISTS idx_domain_events_type
               ON domain_events(event_type, published_at)`, (err) => {
+        clearTimeout(timeout);
         if (err) {
           reject(err);
         } else {

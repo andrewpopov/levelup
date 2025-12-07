@@ -1345,9 +1345,12 @@ if (process.env.NODE_ENV === 'production') {
 export default app;
 
 // Initialize database and start server (only when run directly, not during testing)
-if (import.meta.url === `file://${process.argv[1]}`) {
+const isRunDirectly = import.meta.url.includes(process.argv[1].replace(/\\/g, '/'));
+if (isRunDirectly) {
+  console.log('Starting server initialization...');
   initializeDatabase()
     .then(() => {
+      console.log('Database initialized, starting server...');
       app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
       });
