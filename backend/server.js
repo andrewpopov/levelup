@@ -686,6 +686,7 @@ app.get('/api/questions/:id/status', authenticateToken, (req, res) => {
 app.post('/api/questions/:id/discuss', authenticateToken, (req, res) => {
   const { id } = req.params;
   const { jointNotes, markAsDiscussed } = req.body;
+  const userId = req.user.userId;
 
   // Check if discussion record exists
   db.get(
@@ -709,6 +710,12 @@ app.post('/api/questions/:id/discuss', authenticateToken, (req, res) => {
             if (err) {
               return res.status(500).json({ error: 'Error updating discussion' });
             }
+
+            // If marked as discussed, also mark the task as completed
+            if (markAsDiscussed) {
+              markTaskAsCompleted(id, userId);
+            }
+
             res.json({ message: 'Discussion updated successfully' });
           }
         );
@@ -722,6 +729,12 @@ app.post('/api/questions/:id/discuss', authenticateToken, (req, res) => {
             if (err) {
               return res.status(500).json({ error: 'Error saving discussion' });
             }
+
+            // If marked as discussed, also mark the task as completed
+            if (markAsDiscussed) {
+              markTaskAsCompleted(id, userId);
+            }
+
             res.json({ id: this.lastID, message: 'Discussion saved successfully' });
           }
         );
@@ -729,6 +742,40 @@ app.post('/api/questions/:id/discuss', authenticateToken, (req, res) => {
     }
   );
 });
+
+// Helper function to mark a question's task as completed
+function markTaskAsCompleted(questionId, userId) {
+  // Find the task associated with this question
+  db.get(
+    `SELECT jt.id as task_id, utp.id as utp_id, utp.user_journey_id
+     FROM journey_tasks jt
+     JOIN user_task_progress utp ON jt.id = utp.task_id
+     WHERE jt.question_id = ? AND utp.user_id = ?`,
+    [questionId, userId],
+    (err, task) => {
+      if (err) {
+        console.error('Error finding task:', err);
+        return;
+      }
+
+      if (!task) {
+        return; // No task found for this question
+      }
+
+      // Mark task as completed
+      db.run(
+        'UPDATE user_task_progress SET status = ?, completed_at = CURRENT_TIMESTAMP WHERE id = ?',
+        ['completed', task.utp_id],
+        (err) => {
+          if (!err) {
+            // Update journey progress after marking task complete
+            updateJourneyProgress(task.user_journey_id);
+          }
+        }
+      );
+    }
+  );
+}
 
 // Get today's suggested prompt (based on current week cycling through 32 weeks)
 app.get('/api/questions/today', authenticateToken, (req, res) => {
