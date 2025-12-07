@@ -10,7 +10,9 @@ import {
   hashPassword,
   comparePassword,
   generateToken,
-  authenticateToken
+  authenticateToken,
+  requireAdmin,
+  checkUserRole
 } from './auth.js';
 import journeyConfigService from './services/journeyConfigService.js';
 
@@ -1325,6 +1327,279 @@ app.get('/api/sparc-prompts/:section', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error fetching prompts:', error);
     res.status(500).json({ error: 'Error fetching prompts' });
+  }
+});
+
+// ============= ADMIN ROUTES =============
+
+// Check if user is admin
+app.get('/api/auth/is-admin', authenticateToken, async (req, res) => {
+  try {
+    const isAdmin = await checkUserRole(req.user.userId, 'admin');
+    res.json({ isAdmin });
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    res.status(500).json({ error: 'Error checking admin status' });
+  }
+});
+
+// Create new journey (admin only)
+app.post('/api/admin/journeys', authenticateToken, requireAdmin, (req, res) => {
+  const {
+    title,
+    description,
+    cover_image_url,
+    duration_weeks,
+    cadence,
+    is_active
+  } = req.body;
+
+  if (!title || !duration_weeks || !cadence) {
+    return res.status(400).json({ error: 'Title, duration, and cadence are required' });
+  }
+
+  const userId = req.user.userId;
+
+  db.run(
+    `INSERT INTO journeys (title, description, cover_image_url, duration_weeks, cadence, is_active, created_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [title, description, cover_image_url, duration_weeks, cadence, is_active || 0, userId],
+    function(err) {
+      if (err) {
+        console.error('Error creating journey:', err);
+        return res.status(500).json({ error: 'Error creating journey' });
+      }
+      res.json({
+        id: this.lastID,
+        title,
+        description,
+        cover_image_url,
+        duration_weeks,
+        cadence,
+        is_active: is_active || 0,
+        created_by: userId
+      });
+    }
+  );
+});
+
+// Update journey (admin only)
+app.put('/api/admin/journeys/:id', authenticateToken, requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const {
+    title,
+    description,
+    cover_image_url,
+    duration_weeks,
+    cadence,
+    is_active
+  } = req.body;
+
+  if (!title || !duration_weeks || !cadence) {
+    return res.status(400).json({ error: 'Title, duration, and cadence are required' });
+  }
+
+  db.run(
+    `UPDATE journeys
+     SET title = ?, description = ?, cover_image_url = ?, duration_weeks = ?,
+         cadence = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+     WHERE id = ?`,
+    [title, description, cover_image_url, duration_weeks, cadence, is_active, id],
+    function(err) {
+      if (err) {
+        console.error('Error updating journey:', err);
+        return res.status(500).json({ error: 'Error updating journey' });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Journey not found' });
+      }
+      res.json({
+        id: parseInt(id),
+        title,
+        description,
+        cover_image_url,
+        duration_weeks,
+        cadence,
+        is_active
+      });
+    }
+  );
+});
+
+// Delete journey (admin only)
+app.delete('/api/admin/journeys/:id', authenticateToken, requireAdmin, (req, res) => {
+  const { id } = req.params;
+
+  db.run('DELETE FROM journeys WHERE id = ?', [id], function(err) {
+    if (err) {
+      console.error('Error deleting journey:', err);
+      return res.status(500).json({ error: 'Error deleting journey' });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Journey not found' });
+    }
+    res.json({ message: 'Journey deleted successfully' });
+  });
+});
+
+// Add task to journey (admin only)
+app.post('/api/admin/journeys/:journeyId/tasks', authenticateToken, requireAdmin, (req, res) => {
+  const { journeyId } = req.params;
+  const {
+    title,
+    description,
+    task_type,
+    task_order,
+    question_id,
+    estimated_time_minutes,
+    page_number,
+    chapter_name
+  } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ error: 'Task title is required' });
+  }
+
+  db.run(
+    `INSERT INTO journey_tasks (journey_id, title, description, task_type, task_order, question_id, estimated_time_minutes, page_number, chapter_name)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [journeyId, title, description, task_type || 'task', task_order || 0, question_id, estimated_time_minutes, page_number, chapter_name],
+    function(err) {
+      if (err) {
+        console.error('Error creating task:', err);
+        return res.status(500).json({ error: 'Error creating task' });
+      }
+      res.json({
+        id: this.lastID,
+        journey_id: parseInt(journeyId),
+        title,
+        description,
+        task_type: task_type || 'task',
+        task_order: task_order || 0,
+        question_id,
+        estimated_time_minutes,
+        page_number,
+        chapter_name
+      });
+    }
+  );
+});
+
+// Update task (admin only)
+app.put('/api/admin/journeys/:journeyId/tasks/:taskId', authenticateToken, requireAdmin, (req, res) => {
+  const { journeyId, taskId } = req.params;
+  const {
+    title,
+    description,
+    task_type,
+    task_order,
+    question_id,
+    estimated_time_minutes,
+    page_number,
+    chapter_name
+  } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ error: 'Task title is required' });
+  }
+
+  db.run(
+    `UPDATE journey_tasks
+     SET title = ?, description = ?, task_type = ?, task_order = ?, question_id = ?,
+         estimated_time_minutes = ?, page_number = ?, chapter_name = ?
+     WHERE id = ? AND journey_id = ?`,
+    [title, description, task_type, task_order, question_id, estimated_time_minutes, page_number, chapter_name, taskId, journeyId],
+    function(err) {
+      if (err) {
+        console.error('Error updating task:', err);
+        return res.status(500).json({ error: 'Error updating task' });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+      res.json({
+        id: parseInt(taskId),
+        journey_id: parseInt(journeyId),
+        title,
+        description,
+        task_type,
+        task_order,
+        question_id,
+        estimated_time_minutes,
+        page_number,
+        chapter_name
+      });
+    }
+  );
+});
+
+// Delete task (admin only)
+app.delete('/api/admin/journeys/:journeyId/tasks/:taskId', authenticateToken, requireAdmin, (req, res) => {
+  const { journeyId, taskId } = req.params;
+
+  db.run(
+    'DELETE FROM journey_tasks WHERE id = ? AND journey_id = ?',
+    [taskId, journeyId],
+    function(err) {
+      if (err) {
+        console.error('Error deleting task:', err);
+        return res.status(500).json({ error: 'Error deleting task' });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+      res.json({ message: 'Task deleted successfully' });
+    }
+  );
+});
+
+// Reorder tasks (admin only)
+app.put('/api/admin/journeys/:journeyId/tasks/reorder', authenticateToken, requireAdmin, async (req, res) => {
+  const { journeyId } = req.params;
+  const { tasks } = req.body; // Array of { id, task_order }
+
+  if (!Array.isArray(tasks)) {
+    return res.status(400).json({ error: 'Tasks array is required' });
+  }
+
+  try {
+    // Use a transaction to update all task orders
+    await new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+
+        let errors = [];
+        let completed = 0;
+
+        tasks.forEach((task, index) => {
+          db.run(
+            'UPDATE journey_tasks SET task_order = ? WHERE id = ? AND journey_id = ?',
+            [task.task_order, task.id, journeyId],
+            (err) => {
+              if (err) errors.push(err);
+              completed++;
+
+              if (completed === tasks.length) {
+                if (errors.length > 0) {
+                  db.run('ROLLBACK');
+                  reject(errors[0]);
+                } else {
+                  db.run('COMMIT', (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                  });
+                }
+              }
+            }
+          );
+        });
+      });
+    });
+
+    res.json({ message: 'Tasks reordered successfully' });
+  } catch (error) {
+    console.error('Error reordering tasks:', error);
+    res.status(500).json({ error: 'Error reordering tasks' });
   }
 });
 

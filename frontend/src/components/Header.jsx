@@ -1,8 +1,31 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { TrendingUp, BookOpen, PenTool, LogOut, Library, Zap } from 'lucide-react';
+import { TrendingUp, BookOpen, PenTool, LogOut, Library, Zap, Settings } from 'lucide-react';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function Header({ user, onLogout }) {
   const location = useLocation();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const response = await axios.get(`${API_URL}/api/auth/is-admin`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setIsAdmin(response.data.isAdmin);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      }
+    };
+
+    checkAdminStatus();
+  }, []);
 
   const isActive = (path) => {
     if (path === '/journaling') {
@@ -14,6 +37,9 @@ function Header({ user, onLogout }) {
     if (path === '/journeys') {
       return location.pathname.startsWith('/journeys') ||
              location.pathname.startsWith('/journey');
+    }
+    if (path === '/admin') {
+      return location.pathname.startsWith('/admin');
     }
     return location.pathname === path;
   };
@@ -39,6 +65,12 @@ function Header({ user, onLogout }) {
             <PenTool size={18} />
             Journaling
           </Link>
+          {isAdmin && (
+            <Link to="/admin/journeys" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
+              <Settings size={18} />
+              Admin
+            </Link>
+          )}
           <button onClick={onLogout} className="icon-button">
             <LogOut size={18} />
           </button>
