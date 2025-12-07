@@ -281,16 +281,27 @@ function DailyQuestion({ user }) {
                 marginBottom: '1rem'
               }}
             />
-            <button
-              className="btn-primary"
-              onClick={handleSaveResponse}
-              disabled={saving || !myResponse.trim()}
-            >
-              {saving ? 'Saving...' : myExistingResponse ? 'Update Response' : 'Save Response'}
-            </button>
-            {myExistingResponse && (
-              <p style={{ marginTop: '1rem', color: '#757575', fontSize: '0.9rem' }}>
-                ✓ Your response is saved. Waiting for your partner to respond...
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+              <button
+                className="btn-primary"
+                onClick={handleSaveResponse}
+                disabled={!myResponse.trim() || myResponse === savedResponse}
+              >
+                {saving ? 'Auto-saving...' : 'Save Response'}
+              </button>
+              {myResponse !== savedResponse ? (
+                <span style={{ color: '#ff9800', fontSize: '0.9rem', fontWeight: '500' }}>
+                  ⚫ Unsaved changes
+                </span>
+              ) : myExistingResponse ? (
+                <span style={{ color: '#388e3c', fontSize: '0.9rem', fontWeight: '500' }}>
+                  ✓ {lastSaved ? `Saved ${new Date(lastSaved).toLocaleTimeString()}` : 'Saved'}
+                </span>
+              ) : null}
+            </div>
+            {myExistingResponse && myResponse === savedResponse && (
+              <p style={{ marginTop: '0.5rem', color: '#757575', fontSize: '0.9rem' }}>
+                Your response is saved. Waiting for your partner to respond...
               </p>
             )}
           </>
