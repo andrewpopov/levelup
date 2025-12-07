@@ -1,0 +1,402 @@
+{
+  "journeys": [
+    {
+      "id": "default",
+      "title": "A Year of Conversations",
+      "description": "A thoughtfully curated collection of 32 meaningful conversations designed to deepen your connection, understanding, and love. Each week brings new insights into your partner and your relationship.",
+      "type": "relationship",
+      "duration_weeks": 32,
+      "cadence": "weekly",
+      "is_active": true,
+      "is_default": true,
+      "cover_image_url": null,
+      "created_by": "system",
+      "questions": [
+        {
+          "week": 1,
+          "category": "Our Foundation",
+          "title": "Our Love Story",
+          "prompt": "Tell the story of how you met and fell in love. What attracted you to your partner?",
+          "details": [
+            "Where and when did you first meet?",
+            "What was your first impression of each other?",
+            "When did you realize you were in love?",
+            "What made you decide to commit to this relationship?"
+          ]
+        },
+        {
+          "week": 2,
+          "category": "Our Foundation",
+          "title": "Core Values",
+          "prompt": "What are the top 5 values that guide your life? How do they align with your partner's values?",
+          "details": [
+            "What principles do you refuse to compromise on?",
+            "Which values do you share with your partner?",
+            "Where do your values differ?",
+            "How do you navigate value differences?"
+          ]
+        },
+        {
+          "week": 3,
+          "category": "Our Foundation",
+          "title": "Relationship Vision",
+          "prompt": "What does your ideal relationship look like 5, 10, and 20 years from now?",
+          "details": [
+            "What kind of partnership do you want to build?",
+            "How do you want to grow together?",
+            "What adventures do you want to share?",
+            "What legacy do you want to create as a couple?"
+          ]
+        },
+        {
+          "week": 4,
+          "category": "Our Foundation",
+          "title": "Non-Negotiables",
+          "prompt": "What are your dealbreakers and must-haves in this relationship?",
+          "details": [
+            "What behaviors or situations are unacceptable to you?",
+            "What needs must be met for you to feel fulfilled?",
+            "How do you communicate your boundaries?",
+            "What are you willing to compromise on?"
+          ]
+        },
+        {
+          "week": 5,
+          "category": "Communication & Connection",
+          "title": "Communication Styles",
+          "prompt": "How do you each prefer to communicate? What patterns have you noticed in your conversations?",
+          "details": [
+            "Are you a processor or a verbal thinker?",
+            "Do you prefer direct or indirect communication?",
+            "When do you communicate best (time of day, setting)?",
+            "What helps you feel heard and understood?"
+          ]
+        },
+        {
+          "week": 6,
+          "category": "Communication & Connection",
+          "title": "Love Languages",
+          "prompt": "What makes you feel most loved? How do you express love to your partner?",
+          "details": [
+            "Which love language resonates most with you?",
+            "How does your partner show love in their way?",
+            "What small gestures mean the most to you?",
+            "How can you better speak your partner's love language?"
+          ]
+        },
+        {
+          "week": 7,
+          "category": "Communication & Connection",
+          "title": "Quality Time",
+          "prompt": "What does quality time together look like for each of you?",
+          "details": [
+            "What activities help you feel most connected?",
+            "How much alone time vs. together time do you each need?",
+            "What distractions get in the way of quality time?",
+            "What new ways could you spend time together?"
+          ]
+        },
+        {
+          "week": 8,
+          "category": "Communication & Connection",
+          "title": "Emotional Safety",
+          "prompt": "What makes you feel emotionally safe with your partner? When do you feel vulnerable?",
+          "details": [
+            "What helps you open up emotionally?",
+            "When do you tend to shut down or withdraw?",
+            "How can your partner support you in difficult moments?",
+            "What builds trust and safety in your relationship?"
+          ]
+        },
+        {
+          "week": 9,
+          "category": "Navigating Challenges",
+          "title": "Conflict Patterns",
+          "prompt": "What patterns do you notice in your conflicts? How do you typically respond to disagreements?",
+          "details": [
+            "Are you a pursuer or a withdrawer in conflicts?",
+            "What triggers escalate your arguments?",
+            "What helps de-escalate tension?",
+            "What do you need from your partner during conflict?"
+          ]
+        },
+        {
+          "week": 10,
+          "category": "Navigating Challenges",
+          "title": "Repair and Forgiveness",
+          "prompt": "How do you repair after a conflict? What does forgiveness look like in your relationship?",
+          "details": [
+            "How do you know when you're ready to reconnect?",
+            "What helps you forgive and let go?",
+            "How do you rebuild trust after hurt?",
+            "What makes a good apology for you?"
+          ]
+        },
+        {
+          "week": 11,
+          "category": "Navigating Challenges",
+          "title": "Stress and External Pressures",
+          "prompt": "How do work, family, and life stressors affect your relationship? How do you support each other?",
+          "details": [
+            "What external pressures create the most strain?",
+            "How does stress affect your behavior toward each other?",
+            "What support do you need when you're stressed?",
+            "How can you be a team against outside stress?"
+          ]
+        },
+        {
+          "week": 12,
+          "category": "Navigating Challenges",
+          "title": "Past Wounds",
+          "prompt": "What past experiences or wounds affect how you show up in this relationship?",
+          "details": [
+            "What patterns from your family of origin do you notice?",
+            "What past hurts are you still healing from?",
+            "How do these wounds affect your relationship?",
+            "What healing do you need, and how can your partner support that?"
+          ]
+        },
+        {
+          "week": 13,
+          "category": "Practical Partnership",
+          "title": "Household Responsibilities",
+          "prompt": "How do you divide household tasks and responsibilities? What's working and what needs adjustment?",
+          "details": [
+            "What's the current division of labor?",
+            "What tasks do you enjoy vs. resent?",
+            "What feels fair vs. unfair?",
+            "How can you redistribute responsibilities more equitably?"
+          ]
+        },
+        {
+          "week": 14,
+          "category": "Practical Partnership",
+          "title": "Financial Partnership",
+          "prompt": "What are your money values, goals, and concerns? How do you make financial decisions together?",
+          "details": [
+            "What did you learn about money growing up?",
+            "What are your financial goals and fears?",
+            "How do you handle spending and saving?",
+            "What money conversations do you need to have?"
+          ]
+        },
+        {
+          "week": 15,
+          "category": "Practical Partnership",
+          "title": "Decision-Making",
+          "prompt": "How do you make decisions together? What decisions need both voices vs. individual autonomy?",
+          "details": [
+            "What's your decision-making process as a couple?",
+            "Where do you need consensus vs. individual freedom?",
+            "How do you handle decision deadlocks?",
+            "What makes you feel respected in the decision-making process?"
+          ]
+        },
+        {
+          "week": 16,
+          "category": "Practical Partnership",
+          "title": "Social Life and Friendships",
+          "prompt": "How do you balance couple time, individual friendships, and shared social life?",
+          "details": [
+            "How much time do you each need with friends?",
+            "What shared friendships enrich your relationship?",
+            "Do you need more or less social time together?",
+            "How do you support each other's individual friendships?"
+          ]
+        },
+        {
+          "week": 17,
+          "category": "Intimacy & Growth",
+          "title": "Physical Intimacy",
+          "prompt": "What does physical intimacy mean to you? How do you navigate differences in desire and needs?",
+          "details": [
+            "What makes you feel desired and connected physically?",
+            "How do you communicate about sex and affection?",
+            "What barriers to intimacy exist?",
+            "How can you prioritize physical connection?"
+          ]
+        },
+        {
+          "week": 18,
+          "category": "Intimacy & Growth",
+          "title": "Emotional Intimacy",
+          "prompt": "How do you create emotional closeness? What helps you feel deeply known by your partner?",
+          "details": [
+            "What conversations bring you closer?",
+            "When do you feel most understood?",
+            "What parts of yourself do you still hide?",
+            "How can you create more emotional vulnerability?"
+          ]
+        },
+        {
+          "week": 19,
+          "category": "Intimacy & Growth",
+          "title": "Personal Growth",
+          "prompt": "How are you each growing as individuals? How does your relationship support or hinder that growth?",
+          "details": [
+            "What personal goals are you working toward?",
+            "How does your partner encourage your growth?",
+            "Where do you feel stuck or stagnant?",
+            "How can you better support each other's development?"
+          ]
+        },
+        {
+          "week": 20,
+          "category": "Intimacy & Growth",
+          "title": "Spirituality and Meaning",
+          "prompt": "What gives your life meaning and purpose? How do you share or support each other's spiritual journey?",
+          "details": [
+            "What are your spiritual or philosophical beliefs?",
+            "What practices bring you peace or connection?",
+            "How do you navigate different beliefs?",
+            "What bigger purpose guides your relationship?"
+          ]
+        },
+        {
+          "week": 21,
+          "category": "Family & Future",
+          "title": "Family of Origin",
+          "prompt": "How do your families of origin affect your relationship? What family patterns do you want to keep or change?",
+          "details": [
+            "What did you learn about relationships from your parents?",
+            "What family dynamics do you bring to this relationship?",
+            "How involved should extended family be?",
+            "What boundaries do you need with family?"
+          ]
+        },
+        {
+          "week": 22,
+          "category": "Family & Future",
+          "title": "Children and Parenting",
+          "prompt": "What are your thoughts on having children? If you have kids, how do you co-parent?",
+          "details": [
+            "Do you want children? How many and when?",
+            "What kind of parents do you want to be?",
+            "How do you handle disagreements about parenting?",
+            "How do you prioritize your relationship while parenting?"
+          ]
+        },
+        {
+          "week": 23,
+          "category": "Family & Future",
+          "title": "Career and Ambitions",
+          "prompt": "What are your career goals and dreams? How do you support each other's professional ambitions?",
+          "details": [
+            "What does career success look like for you?",
+            "What sacrifices might your careers require?",
+            "How do you balance two careers?",
+            "What would you do if you had to choose between career and relationship?"
+          ]
+        },
+        {
+          "week": 24,
+          "category": "Family & Future",
+          "title": "Where to Live",
+          "prompt": "Where do you each want to live? How do you navigate preferences about location, home, and lifestyle?",
+          "details": [
+            "What's your ideal living situation?",
+            "Would you move for a partner's job or family?",
+            "What does \"home\" mean to you?",
+            "How do you create a home together?"
+          ]
+        },
+        {
+          "week": 25,
+          "category": "Deepening Connection",
+          "title": "Adventures and Fun",
+          "prompt": "What brings joy and playfulness to your relationship? What adventures do you want to share?",
+          "details": [
+            "When do you laugh together most?",
+            "What new experiences do you want to try?",
+            "How can you bring more fun into daily life?",
+            "What shared hobbies could you develop?"
+          ]
+        },
+        {
+          "week": 26,
+          "category": "Deepening Connection",
+          "title": "Gratitude and Appreciation",
+          "prompt": "What do you appreciate most about your partner? How do you express gratitude?",
+          "details": [
+            "What qualities do you admire in your partner?",
+            "What do they do that makes your life better?",
+            "How do you show appreciation?",
+            "What appreciation do you need to hear?"
+          ]
+        },
+        {
+          "week": 27,
+          "category": "Deepening Connection",
+          "title": "Rituals and Traditions",
+          "prompt": "What rituals and traditions make your relationship special? What new ones do you want to create?",
+          "details": [
+            "What daily or weekly rituals do you cherish?",
+            "What traditions do you want to continue or start?",
+            "How do you celebrate milestones?",
+            "What rituals help you stay connected?"
+          ]
+        },
+        {
+          "week": 28,
+          "category": "Deepening Connection",
+          "title": "Support During Hardship",
+          "prompt": "How do you want to support each other through life's inevitable hardships?",
+          "details": [
+            "What past hardships have you weathered together?",
+            "What support do you need during difficult times?",
+            "How can you be there for each other better?",
+            "What gives you hope during hard times?"
+          ]
+        },
+        {
+          "week": 29,
+          "category": "Looking Forward",
+          "title": "Dreams and Aspirations",
+          "prompt": "What dreams do you have for your life together? What adventures are on your bucket list?",
+          "details": [
+            "What do you dream of experiencing together?",
+            "What goals do you have as a couple?",
+            "What legacy do you want to leave?",
+            "How can you make your dreams reality?"
+          ]
+        },
+        {
+          "week": 30,
+          "category": "Looking Forward",
+          "title": "Aging Together",
+          "prompt": "What does growing old together look like? How do you want to support each other through aging?",
+          "details": [
+            "What do you look forward to in growing older?",
+            "What concerns do you have about aging?",
+            "How will you care for each other?",
+            "What kind of elderly couple do you want to be?"
+          ]
+        },
+        {
+          "week": 31,
+          "category": "Looking Forward",
+          "title": "Continuous Renewal",
+          "prompt": "How do you keep your relationship fresh and growing? What helps you avoid stagnation?",
+          "details": [
+            "What makes your relationship feel alive?",
+            "When do you feel most connected?",
+            "What ruts do you want to avoid?",
+            "How can you keep choosing each other?"
+          ]
+        },
+        {
+          "week": 32,
+          "category": "Looking Forward",
+          "title": "Our Commitment",
+          "prompt": "What does commitment mean to you? How do you want to recommit to this relationship going forward?",
+          "details": [
+            "Why do you choose this person and this relationship?",
+            "What promises do you make to each other?",
+            "What commitment looks like in practice?",
+            "How will you continue to nurture this love?"
+          ]
+        }
+      ]
+    }
+  ]
+}
