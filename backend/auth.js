@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import db from './database.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key';
 
@@ -38,4 +39,35 @@ export function authenticateToken(req, res, next) {
 
   req.user = user;
   next();
+}
+
+// Check if user has admin role
+export function checkUserRole(userId, role) {
+  return new Promise((resolve, reject) => {
+    db.get(
+      'SELECT * FROM user_roles WHERE user_id = ? AND role = ?',
+      [userId, role],
+      (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(!!row);
+        }
+      }
+    );
+  });
+}
+
+// Middleware to require admin role
+export async function requireAdmin(req, res, next) {
+  try {
+    const isAdmin = await checkUserRole(req.user.userId, 'admin');
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    next();
+  } catch (error) {
+    console.error('Error checking admin role:', error);
+    res.status(500).json({ error: 'Error verifying permissions' });
+  }
 }

@@ -17,6 +17,8 @@ import JourneyReader from './components/JourneyReader';
 import Header from './components/Header';
 import StorySlotDashboard from './components/behavioral/StorySlotDashboard';
 import StoryBuilder from './components/behavioral/StoryBuilder';
+import AdminJourneyList from './components/admin/AdminJourneyList';
+import JourneyBuilder from './components/admin/JourneyBuilder';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -212,6 +214,36 @@ function App() {
           element={
             isAuthenticated ? (
               <StoryBuilder />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin/journeys"
+          element={
+            isAuthenticated ? (
+              <AdminJourneyList />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin/journeys/new"
+          element={
+            isAuthenticated ? (
+              <JourneyBuilder />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin/journeys/:id/edit"
+          element={
+            isAuthenticated ? (
+              <JourneyBuilder />
             ) : (
               <Navigate to="/login" replace />
             )
