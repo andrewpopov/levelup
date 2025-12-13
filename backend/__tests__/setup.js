@@ -3,15 +3,20 @@
  * Runs before all tests
  */
 
-// Suppress console logs during tests (optional)
-// global.console = {
-//   ...console,
-//   log: jest.fn(),
-//   warn: jest.fn()
-// };
+import { jest as jestLib } from '@jest/globals';
+
+// Make jest available globally for ES modules
+global.jest = jestLib;
 
 // Set test timeout
-jest.setTimeout(10000);
+global.jest.setTimeout(10000);
 
 // Mock environment variables if needed
 process.env.NODE_ENV = 'test';
+
+// Suppress console logs during tests (optional)
+// global.console = {
+//   ...console,
+//   log: global.jest.fn(),
+//   warn: global.jest.fn()
+// };

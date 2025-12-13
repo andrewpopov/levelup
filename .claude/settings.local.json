@@ -27,7 +27,11 @@
       "Bash(timeout:*)",
       "Bash(/bashes)",
       "Bash(taskkill:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(cat:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(npm audit:*)"
     ],
     "deny": [],
     "ask": []

@@ -2,6 +2,7 @@
  * Communication Service Tests
  */
 
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { CommunicationService } from '../../services/CommunicationService.js';
 import eventBus from '../../core/event-bus.js';
 import { ResponseSubmittedEvent, DiscussionRecordedEvent } from '../../core/domain-events.js';
@@ -11,8 +12,9 @@ describe('CommunicationService', () => {
   let mockQuestionRepository;
 
   beforeEach(() => {
-    eventBus.clearHistory();
-    eventBus.clearListeners();
+    jest.clearAllMocks();
+    if (eventBus.clearHistory) eventBus.clearHistory();
+    if (eventBus.clearListeners) eventBus.clearListeners();
 
     mockQuestionRepository = {
       findById: jest.fn(),

@@ -2,6 +2,7 @@
  * Authentication Service Tests
  */
 
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { AuthenticationService } from '../../services/AuthenticationService.js';
 import eventBus from '../../core/event-bus.js';
 import { UserRegisteredEvent, UserLoggedInEvent } from '../../core/domain-events.js';
@@ -11,9 +12,10 @@ describe('AuthenticationService', () => {
   let mockDb;
 
   beforeEach(() => {
-    // Clear event history before each test
-    eventBus.clearHistory();
-    eventBus.clearListeners();
+    jest.clearAllMocks();
+    // Clear event history and listeners before each test
+    if (eventBus.clearHistory) eventBus.clearHistory();
+    if (eventBus.clearListeners) eventBus.clearListeners();
 
     // Mock database with simple in-memory storage
     mockDb = {

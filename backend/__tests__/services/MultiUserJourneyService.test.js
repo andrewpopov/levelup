@@ -2,6 +2,7 @@
  * Multi-User Journey Service Tests
  */
 
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { MultiUserJourneyService } from '../../services/MultiUserJourneyService.js';
 import eventBus from '../../core/event-bus.js';
 import {
@@ -17,8 +18,9 @@ describe('MultiUserJourneyService', () => {
   let mockJourneyRepository;
 
   beforeEach(() => {
-    eventBus.clearHistory();
-    eventBus.clearListeners();
+    jest.clearAllMocks();
+    if (eventBus.clearHistory) eventBus.clearHistory();
+    if (eventBus.clearListeners) eventBus.clearListeners();
 
     mockMultiUserRepository = {
       createTeamJourney: jest.fn(),

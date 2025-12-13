@@ -2,6 +2,7 @@
  * Learning Service Tests
  */
 
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { LearningService } from '../../services/LearningService.js';
 import eventBus from '../../core/event-bus.js';
 import {
@@ -15,8 +16,9 @@ describe('LearningService', () => {
   let mockJourneyRepository;
 
   beforeEach(() => {
-    eventBus.clearHistory();
-    eventBus.clearListeners();
+    jest.clearAllMocks();
+    if (eventBus.clearHistory) eventBus.clearHistory();
+    if (eventBus.clearListeners) eventBus.clearListeners();
 
     mockJourneyRepository = {
       findActive: jest.fn(),

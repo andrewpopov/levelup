@@ -13,6 +13,7 @@ import {
   authenticateToken
 } from './auth.js';
 import journeyConfigService from './services/journeyConfigService.js';
+import systemDesignRoutes from './routes/systemDesignRoutes.js';
 
 dotenv.config();
 
@@ -1374,6 +1375,10 @@ app.get('/api/sparc-prompts/:section', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Error fetching prompts' });
   }
 });
+
+// ============= SYSTEM DESIGN PRACTICE ROUTES =============
+
+app.use('/api/system-design', systemDesignRoutes);
 
 // ============= HEALTH CHECK =============
 

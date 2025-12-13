@@ -2,6 +2,7 @@
  * Enhanced Response Service Tests
  */
 
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { EnhancedResponseService } from '../../services/EnhancedResponseService.js';
 import eventBus from '../../core/event-bus.js';
 import { ResponseSubmittedEvent } from '../../core/domain-events.js';
@@ -12,8 +13,9 @@ describe('EnhancedResponseService', () => {
   let mockQuestionRepository;
 
   beforeEach(() => {
-    eventBus.clearHistory();
-    eventBus.clearListeners();
+    jest.clearAllMocks();
+    if (eventBus.clearHistory) eventBus.clearHistory();
+    if (eventBus.clearListeners) eventBus.clearListeners();
 
     mockEnhancedRepository = {
       createEnhancedResponse: jest.fn(),
