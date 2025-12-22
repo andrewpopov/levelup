@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A personal growth platform for structured learning through guided journeys",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "install:all": "cd backend && npm install && cd ../frontend && npm install",
