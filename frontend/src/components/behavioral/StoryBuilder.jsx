@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
-import axios from 'axios';
+import {
+  getJourneyStorySlots,
+  getSparcPrompts,
+  createStory,
+  updateStorySection,
+  tagStorySignals,
+  completeStory
+} from '../../api';
 
 function StoryBuilder() {
   const { journeyId, slotId } = useParams();
@@ -42,14 +49,8 @@ function StoryBuilder() {
 
   const loadSlotAndSignals = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
       // Get story slot details
-      const slotRes = await axios.get(
-        `${apiUrl}/api/journeys/${journeyId}/story-slots`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const slotRes = await getJourneyStorySlots(journeyId);
       const slotData = slotRes.data.find(s => s.slot_key === slotId);
       setSlot(slotData);
 
@@ -63,10 +64,7 @@ function StoryBuilder() {
       // Load micro-prompts for each SPARC section
       const prompts = {};
       for (const section of ['situation', 'problem', 'actions', 'results', 'coda']) {
-        const promptRes = await axios.get(
-          `${apiUrl}/api/sparc-prompts/${section}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const promptRes = await getSparcPrompts(section);
         prompts[section] = promptRes.data;
       }
       setMicroPrompts(prompts);
@@ -84,21 +82,14 @@ function StoryBuilder() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-      const res = await axios.post(
-        `${apiUrl}/api/stories`,
-        {
-          journeyId,
-          slotId: parseInt(slot.id),
-          storyTitle: title,
-          year: parseInt(year),
-          stakeholders,
-          stakes
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await createStory({
+        journeyId,
+        slotId: parseInt(slot.id),
+        storyTitle: title,
+        year: parseInt(year),
+        stakeholders,
+        stakes
+      });
 
       setStoryId(res.data.id);
       setCurrentStep(2);
@@ -119,14 +110,7 @@ function StoryBuilder() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-      await axios.put(
-        `${apiUrl}/api/stories/${storyId}/sparc/${section}`,
-        { content: sparc[section] },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await updateStorySection(storyId, section, sparc[section]);
 
       setError(null);
 
@@ -156,21 +140,10 @@ function StoryBuilder() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-      await axios.post(
-        `${apiUrl}/api/stories/${storyId}/signals`,
-        { signals: selectedSignals },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await tagStorySignals(storyId, selectedSignals);
 
       // Mark story as complete
-      await axios.put(
-        `${apiUrl}/api/stories/${storyId}/complete`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await completeStory(storyId);
 
       setError(null);
       // Navigate back to slot dashboard

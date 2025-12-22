@@ -127,4 +127,35 @@ export const startTask = (taskId) =>
 export const completeTask = (taskId) =>
   api.post(`/tasks/${taskId}/complete`);
 
+// Story Slots & Stories API
+export const getJourneyStorySlots = (journeyId) =>
+  api.get(`/journeys/${journeyId}/story-slots`);
+
+export const getJourneyStoryProgress = (journeyId) =>
+  api.get(`/journeys/${journeyId}/story-slots/progress`);
+
+export const getJourneyStories = (journeyId) =>
+  api.get(`/journeys/${journeyId}/stories`);
+
+export const getJourneySignalCoverage = (journeyId) =>
+  api.get(`/journeys/${journeyId}/signal-coverage`);
+
+export const getSparcPrompts = (section) =>
+  api.get(`/sparc-prompts/${section}`);
+
+export const createStory = (storyData) =>
+  api.post('/stories', storyData);
+
+export const getStory = (storyId) =>
+  api.get(`/stories/${storyId}`);
+
+export const updateStorySection = (storyId, section, content) =>
+  api.put(`/stories/${storyId}/sparc/${section}`, { content });
+
+export const completeStory = (storyId) =>
+  api.put(`/stories/${storyId}/complete`);
+
+export const tagStorySignals = (storyId, signals) =>
+  api.post(`/stories/${storyId}/signals`, { signals });
+
 export default api;

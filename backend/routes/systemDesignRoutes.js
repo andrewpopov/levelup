@@ -19,7 +19,7 @@ router.post('/journeys', async (req, res) => {
     res.json({ success: true, journeyId });
   } catch (err) {
     console.error('Error creating flashcard journey:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to create flashcard journey' });
   }
 });
 
@@ -40,7 +40,7 @@ router.post('/journeys/:journeyId/sessions', async (req, res) => {
     res.json({ success: true, sessionId });
   } catch (err) {
     console.error('Error starting flashcard session:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to start flashcard session' });
   }
 });
 
@@ -74,7 +74,7 @@ router.get('/sessions/:sessionId/next-question', async (req, res) => {
     });
   } catch (err) {
     console.error('Error getting next question:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to get next question' });
   }
 });
 
@@ -95,7 +95,7 @@ router.post('/sessions/:sessionId/submit-answer', async (req, res) => {
     res.json({ success: true, responseId });
   } catch (err) {
     console.error('Error submitting answer:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to submit answer' });
   }
 });
 
@@ -119,7 +119,7 @@ router.get('/sessions/:sessionId/questions/:questionId/guided-answer', async (re
     });
   } catch (err) {
     console.error('Error getting guided answer:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to get guided answer' });
   }
 });
 
@@ -143,7 +143,7 @@ router.get('/sessions/:sessionId/questions/:questionId/response', async (req, re
     });
   } catch (err) {
     console.error('Error getting user response:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to get user response' });
   }
 });
 
@@ -164,7 +164,7 @@ router.get('/journeys/:journeyId/progress', async (req, res) => {
     res.json({ success: true, progress });
   } catch (err) {
     console.error('Error getting progress:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to get progress' });
   }
 });
 
@@ -185,7 +185,7 @@ router.post('/journeys/:journeyId/reset', async (req, res) => {
     res.json({ success: true, message: 'Question bank reset' });
   } catch (err) {
     console.error('Error resetting question bank:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to reset question bank' });
   }
 });
 
@@ -205,7 +205,7 @@ router.post('/sessions/:sessionId/end', async (req, res) => {
     res.json({ success: true, message: 'Session ended' });
   } catch (err) {
     console.error('Error ending session:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to end session' });
   }
 });
 
@@ -225,7 +225,7 @@ router.get('/user/:userId/journeys', async (req, res) => {
     res.json({ success: true, journeys });
   } catch (err) {
     console.error('Error getting user journeys:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to get user journeys' });
   }
 });
 
@@ -245,7 +245,7 @@ router.get('/user/:userId/sessions', async (req, res) => {
     res.json({ success: true, sessions });
   } catch (err) {
     console.error('Error getting user sessions:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to get user sessions' });
   }
 });
 
@@ -266,7 +266,7 @@ router.get('/sessions/:sessionId/details', async (req, res) => {
     res.json({ success: true, session });
   } catch (err) {
     console.error('Error getting session details:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to get session details' });
   }
 });
 

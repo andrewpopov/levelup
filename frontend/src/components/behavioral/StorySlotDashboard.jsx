@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BookOpen, Play, CheckCircle2, Lock, TrendingUp, ArrowRight } from 'lucide-react';
-import axios from 'axios';
+import { getJourney, getJourneyStoryProgress, getJourneySignalCoverage } from '../../api';
 
 function StorySlotDashboard() {
   const { journeyId } = useParams();
@@ -17,27 +17,16 @@ function StorySlotDashboard() {
 
   const loadDashboardData = async () => {
     try {
-      const token = localStorage.getItem('token');
-
       // Get journey details
-      const journeyRes = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/journeys/${journeyId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const journeyRes = await getJourney(journeyId);
       setJourney(journeyRes.data);
 
       // Get story slot progress
-      const progressRes = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/journeys/${journeyId}/story-slots/progress`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const progressRes = await getJourneyStoryProgress(journeyId);
       setSlotProgress(progressRes.data);
 
       // Get signal coverage
-      const coverageRes = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/journeys/${journeyId}/signal-coverage`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const coverageRes = await getJourneySignalCoverage(journeyId);
       setSignalCoverage(coverageRes.data);
 
       setLoading(false);

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
+import rateLimit from 'express-rate-limit';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { mkdir } from 'fs/promises';
@@ -27,6 +28,29 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
+
+// Rate limiting
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: { error: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 auth requests per windowMs
+  message: { error: 'Too many authentication attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Apply rate limiting to all requests
+app.use('/api', generalLimiter);
+
+// Apply stricter rate limiting to auth routes
+app.use('/api/auth', authLimiter);
 
 // Serve frontend static files in production
 if (process.env.NODE_ENV === 'production') {
@@ -207,7 +231,8 @@ app.delete('/api/journal-entries/:id', authenticateToken, (req, res) => {
 
 app.get('/api/memories', authenticateToken, (req, res) => {
   db.all(
-    'SELECT * FROM memories ORDER BY memory_date DESC, created_at DESC',
+    'SELECT * FROM memories WHERE user_id = ? ORDER BY memory_date DESC, created_at DESC',
+    [req.user.userId],
     (err, memories) => {
       if (err) {
         return res.status(500).json({ error: 'Error fetching memories' });
@@ -265,7 +290,8 @@ app.delete('/api/memories/:id', authenticateToken, (req, res) => {
 
 app.get('/api/gratitude', authenticateToken, (req, res) => {
   db.all(
-    'SELECT * FROM gratitude_entries ORDER BY entry_date DESC',
+    'SELECT * FROM gratitude_entries WHERE user_id = ? ORDER BY entry_date DESC',
+    [req.user.userId],
     (err, entries) => {
       if (err) {
         return res.status(500).json({ error: 'Error fetching gratitude entries' });
@@ -316,7 +342,8 @@ app.delete('/api/gratitude/:id', authenticateToken, (req, res) => {
 
 app.get('/api/goals', authenticateToken, (req, res) => {
   db.all(
-    'SELECT * FROM goals ORDER BY created_at DESC',
+    'SELECT * FROM goals WHERE created_by = ? ORDER BY created_at DESC',
+    [req.user.userId],
     (err, goals) => {
       if (err) {
         return res.status(500).json({ error: 'Error fetching goals' });
@@ -358,8 +385,8 @@ app.put('/api/goals/:id', authenticateToken, (req, res) => {
   const completedAt = status === 'completed' ? new Date().toISOString() : null;
 
   db.run(
-    'UPDATE goals SET title = ?, description = ?, target_date = ?, status = ?, completed_at = ? WHERE id = ?',
-    [title, description, targetDate, status, completedAt, id],
+    'UPDATE goals SET title = ?, description = ?, target_date = ?, status = ?, completed_at = ? WHERE id = ? AND created_by = ?',
+    [title, description, targetDate, status, completedAt, id, req.user.userId],
     function(err) {
       if (err) {
         return res.status(500).json({ error: 'Error updating goal' });
@@ -376,8 +403,8 @@ app.delete('/api/goals/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
 
   db.run(
-    'DELETE FROM goals WHERE id = ?',
-    [id],
+    'DELETE FROM goals WHERE id = ? AND created_by = ?',
+    [id, req.user.userId],
     function(err) {
       if (err) {
         return res.status(500).json({ error: 'Error deleting goal' });
@@ -1239,13 +1266,22 @@ app.put('/api/stories/:storyId/sparc/:section', authenticateToken, (req, res) =>
   const { content } = req.body;
   const userId = req.user.userId;
 
-  const validSections = ['situation', 'problem', 'actions', 'results', 'coda'];
-  if (!validSections.includes(section)) {
+  // Whitelist map for valid column names - prevents SQL injection
+  const sectionColumns = {
+    situation: 'situation',
+    problem: 'problem',
+    actions: 'actions',
+    results: 'results',
+    coda: 'coda'
+  };
+
+  const columnName = sectionColumns[section];
+  if (!columnName) {
     return res.status(400).json({ error: 'Invalid SPARC section' });
   }
 
   db.run(
-    `UPDATE user_stories SET ${section} = ?, updated_at = CURRENT_TIMESTAMP
+    `UPDATE user_stories SET ${columnName} = ?, updated_at = CURRENT_TIMESTAMP
      WHERE id = ? AND user_id = ?`,
     [content, storyId, userId],
     function(err) {

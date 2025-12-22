@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Target, TrendingUp, ArrowRight, Clock, CheckCircle2, Library, Calendar, Zap } from 'lucide-react';
-import axios from 'axios';
+import { getMyJourneys } from '../api';
 
 function Dashboard({ user }) {
   const [activeJourneys, setActiveJourneys] = useState([]);
@@ -19,12 +19,8 @@ function Dashboard({ user }) {
 
   const loadDashboardData = async () => {
     try {
-      const token = localStorage.getItem('token');
-
       // Get user's active journeys
-      const journeysResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/my-journeys`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const journeysResponse = await getMyJourneys();
 
       const journeys = journeysResponse.data;
       setActiveJourneys(journeys);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { TrendingUp, AlertCircle } from 'lucide-react';
-import axios from 'axios';
+import { getJourneySignalCoverage, getJourneyStories } from '../../api';
 
 /**
  * Coverage Visualizer Component
@@ -47,21 +47,13 @@ function CoverageVisualizer({
   const loadCoverageData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
       // Load signal coverage
-      const coverageRes = await axios.get(
-        `${apiUrl}/api/journeys/${journeyId}/signal-coverage`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const coverageRes = await getJourneySignalCoverage(journeyId);
       setCoverage(coverageRes.data || {});
 
       // Load all stories to show breakdown
-      const storiesRes = await axios.get(
-        `${apiUrl}/api/journeys/${journeyId}/stories`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const storiesRes = await getJourneyStories(journeyId);
       setStories(storiesRes.data || []);
 
       setError(null);

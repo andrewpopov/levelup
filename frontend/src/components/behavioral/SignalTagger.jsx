@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
-import axios from 'axios';
+import { tagStorySignals } from '../../api';
 
 /**
  * Signal Tagging Component
@@ -84,14 +84,7 @@ function SignalTagger({
 
     try {
       setSaving(true);
-      const token = localStorage.getItem('token');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-      await axios.post(
-        `${apiUrl}/api/stories/${storyId}/signals`,
-        { signals: selectedSignals.map(s => ({ signalName: s.name, strength: s.strength })) },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await tagStorySignals(storyId, selectedSignals.map(s => ({ signalName: s.name, strength: s.strength })));
 
       setError(null);
       setSuccess(true);

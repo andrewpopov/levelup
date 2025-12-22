@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
-import axios from 'axios';
+import { getSparcPrompts, updateStorySection } from '../../api';
 
 /**
  * Reusable SPARC Section Component
@@ -60,13 +60,7 @@ function SPARCSection({
   const loadMicroPrompts = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-      const res = await axios.get(
-        `${apiUrl}/api/sparc-prompts/${section}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await getSparcPrompts(section);
       setMicroPrompts(res.data);
       setError(null);
     } catch (err) {
@@ -93,14 +87,7 @@ function SPARCSection({
 
     try {
       setSaving(true);
-      const token = localStorage.getItem('token');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-      await axios.put(
-        `${apiUrl}/api/stories/${storyId}/sparc/${section}`,
-        { content },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await updateStorySection(storyId, section, content);
 
       setError(null);
       setSuccess(true);
