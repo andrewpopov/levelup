@@ -30,12 +30,21 @@ function DailyQuestion({ user }) {
       return;
     }
 
-    const timer = setTimeout(() => {
-      handleAutoSave();
+    const timer = setTimeout(async () => {
+      setSaving(true);
+      try {
+        await saveQuestionResponse(question.id, myResponse);
+        setSavedResponse(myResponse);
+        setLastSaved(new Date());
+      } catch (error) {
+        console.error('Error auto-saving response:', error);
+      } finally {
+        setSaving(false);
+      }
     }, 2000); // Auto-save after 2 seconds of no typing
 
     return () => clearTimeout(timer);
-  }, [myResponse]);
+  }, [myResponse, question, savedResponse]);
 
   const loadQuestion = async () => {
     try {

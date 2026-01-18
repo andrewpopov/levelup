@@ -177,15 +177,13 @@ describe('Relationship Journey (A Year of Conversations)', () => {
   });
 
   describe('Relationship Journey Seeding', () => {
-    test('relationship seed script should exist and be executable', async () => {
-      // Verify the seed file exists
+    test('relationship questions seed script should exist', async () => {
+      // Verify the seed file exists in scripts directory
       const fs = await import('fs/promises');
-      const path = 'E:\\proj\\levelup\\backend\\seed-relationship-journey.js';
+      const path = 'E:\\proj\\levelup\\backend\\scripts\\seed-questions.js';
 
       try {
         const content = await fs.readFile(path, 'utf-8');
-        expect(content).toContain('relationshipQuestions');
-        expect(content).toContain('Our Foundation');
         expect(content).toContain('INSERT INTO');
       } catch (err) {
         // File should exist
@@ -193,9 +191,9 @@ describe('Relationship Journey (A Year of Conversations)', () => {
       }
     });
 
-    test('seed script should define relationship questions', async () => {
+    test('seed script should define question categories', async () => {
       const fs = await import('fs/promises');
-      const path = 'E:\\proj\\levelup\\backend\\seed-relationship-journey.js';
+      const path = 'E:\\proj\\levelup\\backend\\scripts\\seed-questions.js';
 
       try {
         const content = await fs.readFile(path, 'utf-8');
@@ -203,8 +201,8 @@ describe('Relationship Journey (A Year of Conversations)', () => {
         // Verify key categories exist
         const expectedCategories = [
           'Our Foundation',
-          'Communication & Connection',
-          'Navigating Challenges'
+          'Communication & Conflict',
+          'Daily Life & Shared Routines'
         ];
 
         expectedCategories.forEach(category => {

@@ -15,6 +15,7 @@ import JourneyLibrary from './components/JourneyLibrary';
 import JourneyDashboard from './components/JourneyDashboard';
 import JourneyReader from './components/JourneyReader';
 import Header from './components/Header';
+import ProtectedRoute from './components/ProtectedRoute';
 import StorySlotDashboard from './components/behavioral/StorySlotDashboard';
 import StoryBuilder from './components/behavioral/StoryBuilder';
 
@@ -57,166 +58,87 @@ function App() {
       {isAuthenticated && <Header user={user} onLogout={handleLogout} />}
 
       <Routes>
+        {/* Public routes */}
         <Route
           path="/login"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Login onLogin={handleLogin} />
-            )
-          }
+          element={isAuthenticated ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />}
         />
         <Route
           path="/register"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Register onRegister={handleLogin} />
-            )
-          }
+          element={isAuthenticated ? <Navigate to="/" replace /> : <Register onRegister={handleLogin} />}
         />
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <Dashboard user={user} />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/journaling"
-          element={
-            isAuthenticated ? (
-              <Journaling />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/journal"
-          element={
-            isAuthenticated ? (
-              <Journal />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/memories"
-          element={
-            isAuthenticated ? (
-              <Memories />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/gratitude"
-          element={
-            isAuthenticated ? (
-              <Gratitude />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/goals"
-          element={
-            isAuthenticated ? (
-              <Goals />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/questions"
-          element={
-            isAuthenticated ? (
-              <Questions />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/daily-question"
-          element={
-            isAuthenticated ? (
-              <DailyQuestion user={user} />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/journey-book"
-          element={
-            isAuthenticated ? (
-              <JourneyBook user={user} />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/journeys"
-          element={
-            isAuthenticated ? (
-              <JourneyLibrary />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/my-journeys"
-          element={
-            isAuthenticated ? (
-              <JourneyDashboard user={user} />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/journey/:journeyId"
-          element={
-            isAuthenticated ? (
-              <JourneyReader user={user} />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/journey/:journeyId/story-slots"
-          element={
-            isAuthenticated ? (
-              <StorySlotDashboard />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/journey/:journeyId/story/:slotId"
-          element={
-            isAuthenticated ? (
-              <StoryBuilder />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
+
+        {/* Protected routes */}
+        <Route path="/" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Dashboard user={user} />
+          </ProtectedRoute>
+        } />
+        <Route path="/journaling" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Journaling />
+          </ProtectedRoute>
+        } />
+        <Route path="/journal" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Journal />
+          </ProtectedRoute>
+        } />
+        <Route path="/memories" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Memories />
+          </ProtectedRoute>
+        } />
+        <Route path="/gratitude" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Gratitude />
+          </ProtectedRoute>
+        } />
+        <Route path="/goals" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Goals />
+          </ProtectedRoute>
+        } />
+        <Route path="/questions" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Questions />
+          </ProtectedRoute>
+        } />
+        <Route path="/daily-question" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <DailyQuestion user={user} />
+          </ProtectedRoute>
+        } />
+        <Route path="/journey-book" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <JourneyBook user={user} />
+          </ProtectedRoute>
+        } />
+        <Route path="/journeys" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <JourneyLibrary />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-journeys" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <JourneyDashboard user={user} />
+          </ProtectedRoute>
+        } />
+        <Route path="/journey/:journeyId" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <JourneyReader user={user} />
+          </ProtectedRoute>
+        } />
+        <Route path="/journey/:journeyId/story-slots" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <StorySlotDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/journey/:journeyId/story/:slotId" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <StoryBuilder />
+          </ProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   );
