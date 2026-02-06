@@ -19,6 +19,7 @@ import tasksRoutes from './routes/tasksRoutes.js';
 import storiesRoutes from './routes/storiesRoutes.js';
 import sparcPromptsRoutes from './routes/sparcPromptsRoutes.js';
 import systemDesignRoutes from './routes/systemDesignRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
@@ -73,6 +74,7 @@ app.use('/api/tasks', tasksRoutes);
 app.use('/api/stories', storiesRoutes);
 app.use('/api/sparc-prompts', sparcPromptsRoutes);
 app.use('/api/system-design', systemDesignRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

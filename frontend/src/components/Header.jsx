@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { TrendingUp, BookOpen, PenTool, LogOut, Library, Zap } from 'lucide-react';
+import { TrendingUp, BookOpen, PenTool, LogOut, Library, Zap, Shield } from 'lucide-react';
 
 function Header({ user, onLogout }) {
   const location = useLocation();
@@ -14,6 +14,9 @@ function Header({ user, onLogout }) {
     if (path === '/journeys') {
       return location.pathname.startsWith('/journeys') ||
              location.pathname.startsWith('/journey');
+    }
+    if (path === '/admin') {
+      return location.pathname.startsWith('/admin');
     }
     return location.pathname === path;
   };
@@ -39,6 +42,12 @@ function Header({ user, onLogout }) {
             <PenTool size={18} />
             Journaling
           </Link>
+          {user?.roles?.includes('admin') && (
+            <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
+              <Shield size={18} />
+              Admin
+            </Link>
+          )}
           <button onClick={onLogout} className="icon-button">
             <LogOut size={18} />
           </button>

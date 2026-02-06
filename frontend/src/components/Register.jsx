@@ -1,13 +1,27 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
-import { register } from '../api';
+import { register, getAuthConfig, googleLogin } from '../api';
+import GoogleSignInButton from './GoogleSignInButton';
 
 function Register({ onRegister }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [authConfig, setAuthConfig] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    getAuthConfig()
+      .then(res => {
+        setAuthConfig(res.data);
+        if (res.data.signupAllowed === false) {
+          navigate('/login', { replace: true });
+        }
+      })
+      .catch(() => {});
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +37,23 @@ function Register({ onRegister }) {
       setLoading(false);
     }
   };
+
+  const handleGoogleSuccess = async (credential) => {
+    setError('');
+    setLoading(true);
+    try {
+      const response = await googleLogin(credential);
+      onRegister(response.data.token, response.data.user);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Google sign-in failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (authConfig?.signupAllowed === false) {
+    return null;
+  }
 
   return (
     <div className="auth-container">
@@ -47,6 +78,26 @@ function Register({ onRegister }) {
         </p>
 
         {error && <div className="error-message">{error}</div>}
+
+        {authConfig?.googleClientId && (
+          <>
+            <GoogleSignInButton
+              clientId={authConfig.googleClientId}
+              onSuccess={handleGoogleSuccess}
+              onError={(msg) => setError(msg)}
+            />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              margin: '1rem 0',
+              gap: '0.75rem'
+            }}>
+              <div style={{ flex: 1, height: '1px', background: '#ddd' }} />
+              <span style={{ color: '#999', fontSize: '0.85rem' }}>or sign up with email</span>
+              <div style={{ flex: 1, height: '1px', background: '#ddd' }} />
+            </div>
+          </>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">

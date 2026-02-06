@@ -1,13 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
-import { login } from '../api';
+import { login, getAuthConfig, googleLogin } from '../api';
+import GoogleSignInButton from './GoogleSignInButton';
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [authConfig, setAuthConfig] = useState(null);
+
+  useEffect(() => {
+    getAuthConfig()
+      .then(res => setAuthConfig(res.data))
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,6 +27,19 @@ function Login({ onLogin }) {
       onLogin(response.data.token, response.data.user);
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credential) => {
+    setError('');
+    setLoading(true);
+    try {
+      const response = await googleLogin(credential);
+      onLogin(response.data.token, response.data.user);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Google sign-in failed');
     } finally {
       setLoading(false);
     }
@@ -42,6 +63,26 @@ function Login({ onLogin }) {
         </p>
 
         {error && <div className="error-message">{error}</div>}
+
+        {authConfig?.googleClientId && (
+          <>
+            <GoogleSignInButton
+              clientId={authConfig.googleClientId}
+              onSuccess={handleGoogleSuccess}
+              onError={(msg) => setError(msg)}
+            />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              margin: '1rem 0',
+              gap: '0.75rem'
+            }}>
+              <div style={{ flex: 1, height: '1px', background: '#ddd' }} />
+              <span style={{ color: '#999', fontSize: '0.85rem' }}>or sign in with email</span>
+              <div style={{ flex: 1, height: '1px', background: '#ddd' }} />
+            </div>
+          </>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -72,9 +113,11 @@ function Login({ onLogin }) {
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '1rem', color: '#757575' }}>
-          Don't have an account? <Link to="/register" style={{ color: '#e91e63' }}>Create Account</Link>
-        </p>
+        {authConfig?.signupAllowed !== false && (
+          <p style={{ textAlign: 'center', marginTop: '1rem', color: '#757575' }}>
+            Don't have an account? <Link to="/register" style={{ color: '#e91e63' }}>Create Account</Link>
+          </p>
+        )}
       </div>
     </div>
   );

@@ -393,12 +393,56 @@ export function initializeDatabase() {
         )
       `);
 
+      // User roles table
+      db.run(`
+        CREATE TABLE IF NOT EXISTS user_roles (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          role TEXT NOT NULL,
+          FOREIGN KEY (user_id) REFERENCES users (id),
+          UNIQUE(user_id, role)
+        )
+      `);
+
+      // System settings table
+      db.run(`
+        CREATE TABLE IF NOT EXISTS system_settings (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_by INTEGER
+        )
+      `);
+
+      // Safe ALTER TABLE for users - add new columns
+      // Each wrapped to ignore "duplicate column" errors from re-runs
+      try {
+        db.run(`ALTER TABLE users ADD COLUMN google_id TEXT`, function(err) {
+          if (err && !err.message.includes('duplicate column')) console.error('ALTER google_id:', err.message);
+        });
+      } catch (e) { /* ignore */ }
+      try {
+        db.run(`ALTER TABLE users ADD COLUMN last_login_at DATETIME`, function(err) {
+          if (err && !err.message.includes('duplicate column')) console.error('ALTER last_login_at:', err.message);
+        });
+      } catch (e) { /* ignore */ }
+      try {
+        db.run(`ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1`, function(err) {
+          if (err && !err.message.includes('duplicate column')) console.error('ALTER is_active:', err.message);
+        });
+      } catch (e) { /* ignore */ }
+
+      // Seed default settings
+      db.run(`INSERT OR IGNORE INTO system_settings (key, value) VALUES ('allow_signups', 'true')`);
+
       // Create indexes
       db.run(`CREATE INDEX IF NOT EXISTS idx_user_journeys_user_status ON user_journeys(user_id, status)`);
       db.run(`CREATE INDEX IF NOT EXISTS idx_task_progress_due_date ON user_task_progress(due_date, status)`);
       db.run(`CREATE INDEX IF NOT EXISTS idx_journey_tasks_journey ON journey_tasks(journey_id, task_order)`);
       db.run(`CREATE INDEX IF NOT EXISTS idx_system_design_questions_category ON system_design_questions(category)`);
       db.run(`CREATE INDEX IF NOT EXISTS idx_user_flashcard_sessions_user ON user_flashcard_sessions(user_id, status)`);
+      db.run(`CREATE INDEX IF NOT EXISTS idx_user_roles_user ON user_roles(user_id)`);
+      db.run(`CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id)`);
       db.run(`CREATE INDEX IF NOT EXISTS idx_domain_events_type ON domain_events(event_type, published_at)`, (err) => {
         if (err) {
           console.error('Database initialization error:', err);

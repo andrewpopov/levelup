@@ -23,6 +23,28 @@ export const register = (username, password) =>
 export const login = (username, password) =>
   api.post('/auth/login', { username, password });
 
+export const getAuthConfig = () =>
+  api.get('/auth/config');
+
+export const googleLogin = (credential) =>
+  api.post('/auth/google', { credential });
+
+// Admin
+export const getAdminUsers = () =>
+  api.get('/admin/users');
+
+export const getAdminSettings = () =>
+  api.get('/admin/settings');
+
+export const updateAdminSetting = (key, value) =>
+  api.put(`/admin/settings/${key}`, { value });
+
+export const toggleUserActive = (userId, isActive) =>
+  api.put(`/admin/users/${userId}/active`, { isActive });
+
+export const addUserRole = (userId, role) =>
+  api.post(`/admin/users/${userId}/roles`, { role });
+
 // Journal Entries
 export const getJournalEntries = (startDate, endDate) =>
   api.get('/journal-entries', { params: { startDate, endDate } });

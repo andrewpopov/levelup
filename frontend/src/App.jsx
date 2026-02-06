@@ -16,6 +16,8 @@ import JourneyDashboard from './components/JourneyDashboard';
 import JourneyReader from './components/JourneyReader';
 import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
+import AdminDashboard from './components/AdminDashboard';
 import StorySlotDashboard from './components/behavioral/StorySlotDashboard';
 import StoryBuilder from './components/behavioral/StoryBuilder';
 
@@ -138,6 +140,13 @@ function App() {
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <StoryBuilder />
           </ProtectedRoute>
+        } />
+
+        {/* Admin route */}
+        <Route path="/admin" element={
+          <AdminProtectedRoute isAuthenticated={isAuthenticated} user={user}>
+            <AdminDashboard user={user} />
+          </AdminProtectedRoute>
         } />
       </Routes>
     </BrowserRouter>
