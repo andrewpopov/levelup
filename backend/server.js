@@ -1,6 +1,6 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -20,8 +20,6 @@ import storiesRoutes from './routes/storiesRoutes.js';
 import sparcPromptsRoutes from './routes/sparcPromptsRoutes.js';
 import systemDesignRoutes from './routes/systemDesignRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
