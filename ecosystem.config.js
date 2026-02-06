@@ -1,9 +1,9 @@
 module.exports = {
   apps: [
     {
-      name: 'relationship-journal-tunnel',
+      name: 'levelup-tunnel',
       script: 'scripts/tools/start-prod-tunnel.js',
-      cwd: '/home/admin/proj/relationship-journal',
+      cwd: '/home/admin/proj/levelup',
       instances: 1,
       autorestart: true,
       watch: false,
@@ -18,8 +18,9 @@ module.exports = {
       time: true
     },
     {
-      name: 'relationship-journal-app',
+      name: 'levelup-app',
       script: 'scripts/tools/start.js',
+      cwd: '/home/admin/proj/levelup',
       instances: 1,
       autorestart: true,
       watch: false,
