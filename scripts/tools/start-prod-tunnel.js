@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 const { spawn } = require('child_process');
 
-console.log('Starting Cloudflare tunnel: relationship-journal (production mode)');
+console.log('Starting Cloudflare tunnel: levelup (production mode)');
 
-const tunnel = spawn('npx', [
-  'cloudflared',
+const tunnel = spawn('cloudflared', [
   'tunnel',
   '--config',
   'cloudflared-config.prod.yml',
   'run',
-  'REPLACE_WITH_TUNNEL_ID'
+  'relationship-journal'
 ], {
   stdio: 'pipe',
   shell: false,
