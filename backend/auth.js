@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import db from './database.js';
 
 // Validate JWT_SECRET in production
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key';
@@ -41,6 +42,15 @@ export function authenticateToken(req, res, next) {
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 
-  req.user = user;
-  next();
+  // Check if user account is still active
+  db.get('SELECT is_active FROM users WHERE id = ?', [user.userId], (err, row) => {
+    if (err || !row) {
+      return res.status(403).json({ error: 'Account not found' });
+    }
+    if (row.is_active === 0) {
+      return res.status(403).json({ error: 'Account has been disabled' });
+    }
+    req.user = user;
+    next();
+  });
 }

@@ -1,10 +1,12 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { initializeDatabase } from './database.js';
+import { authenticateToken } from './auth.js';
 
 // Route imports
 import authRoutes from './routes/authRoutes.js';
@@ -28,9 +30,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
-app.use(express.json());
-app.use('/uploads', express.static(join(__dirname, 'uploads')));
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? ['https://levelup.andrewvpopov.com']
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+app.use(helmet());
+app.use(express.json({ limit: '1mb' }));
+
+// Serve uploads behind authentication
+app.use('/uploads', authenticateToken, express.static(join(__dirname, 'uploads')));
 
 // Rate limiting
 const generalLimiter = rateLimit({
