@@ -4,7 +4,7 @@ module.exports = {
       name: 'levelup-tunnel',
       script: 'scripts/tools/start-prod-tunnel.js',
       cwd: '/home/admin/proj/levelup',
-      instances: 1,
+      exec_mode: 'fork',
       autorestart: true,
       watch: false,
       env: {
@@ -21,7 +21,7 @@ module.exports = {
       name: 'levelup-app',
       script: 'scripts/tools/start.js',
       cwd: '/home/admin/proj/levelup',
-      instances: 1,
+      exec_mode: 'fork',
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',
